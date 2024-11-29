@@ -1,0 +1,39 @@
+version: '3.9'
+
+name: 'iot'
+
+services:
+  timescale:
+    image: timescale/timescaledb:latest-pg16
+    container_name: timescale
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - timescale-volume:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      start_period: 40s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    ports:
+      - 5400:80
+    volumes:
+      - pgadmin-volume:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mail.com
+      PGADMIN_DEFAULT_PASSWORD: pass
+    depends_on:
+      timescale:
+        condition: service_healthy
+
+volumes:
+  timescale-volume:
+  pgadmin-volume:
