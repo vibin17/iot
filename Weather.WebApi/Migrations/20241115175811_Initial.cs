@@ -25,8 +25,8 @@ namespace Weather.WebApi.Migrations
                 });
 
             migrationBuilder.Sql(@"
-SELECT create_hypertable( ""WeatherEntries"", 'Timestamp');
-CREATE INDEX ix_symbol_time ON ""Stocks"" (""Timestamp"") DESC)");
+SELECT create_hypertable('""WeatherEntries""', 'Timestamp');
+CREATE INDEX ix_symbol_time ON ""WeatherEntries"" (""Timestamp"" DESC)");
         }
 
         /// <inheritdoc />
