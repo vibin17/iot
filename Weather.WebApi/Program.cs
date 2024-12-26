@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
+using Weather.WebApi.Background;
 using Weather.WebApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,8 @@ builder.Services.AddDbContext<WeatherContext>(
     c => c.UseNpgsql(
         "Host=localhost;Port=5432;Database=weather;Password=postgres;Username=postgres", 
         pgsql => pgsql.MigrationsAssembly(typeof(Program).Assembly.FullName)));
+
+builder.Services.AddHostedService<Worker>();
 
 var app = builder.Build();
 
