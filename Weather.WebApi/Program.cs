@@ -28,9 +28,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", async (WeatherContext context) =>
 {
-
+    return await context.WeatherEntries.ToListAsync();
 })
 .WithName("GetWeatherForecast")
 .WithOpenApi();

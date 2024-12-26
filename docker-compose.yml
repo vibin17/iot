@@ -21,7 +21,7 @@ services:
       retries: 5
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:8.8
     container_name: pgadmin4
     ports:
       - 5400:80
