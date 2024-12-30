@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
+using Weather.WebApi.Api;
 using Weather.WebApi.Background;
 using Weather.WebApi.Data;
 
@@ -28,13 +29,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/weatherforecast", async (WeatherContext context) =>
-{
-    return await context.WeatherEntries.ToListAsync();
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
+app.MapWeatherApi();
 
 var scope = app.Services.CreateScope();
 var dbContext = scope.ServiceProvider.GetRequiredService<WeatherContext>();

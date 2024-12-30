@@ -18,36 +18,36 @@ public sealed class Worker(IServiceScopeFactory scopeFactory) : BackgroundServic
 
         var lines = await File.ReadAllLinesAsync("pollution.csv", stoppingToken);
         var context = scope.ServiceProvider.GetRequiredService<WeatherContext>();
-        var connection = (NpgsqlConnection)context.Database.GetDbConnection();
+//        var connection = (NpgsqlConnection)context.Database.GetDbConnection();
 
-        await connection.OpenAsync(stoppingToken);
+//        await connection.OpenAsync(stoppingToken);
 
-        foreach (var line in lines.Skip(1))
-        {
-            var values = line.Split(",");
-            var timestamp = DateTimeOffset.Parse(values[0]).AddYears(13);
-            var td = double.Parse(values[2], CultureInfo.InvariantCulture);
-            var temperature = double.Parse(values[3], CultureInfo.InvariantCulture);
-            var pressure = double.Parse(values[4], CultureInfo.InvariantCulture);
-            var humidity = GetHumidity(td, temperature);
+//        foreach (var line in lines.Skip(2137).Take(4000))
+//        {
+//            var values = line.Split(",");
+//            var timestamp = DateTimeOffset.Parse(values[0]).AddYears(13).ToUniversalTime();
+//            var td = double.Parse(values[2], CultureInfo.InvariantCulture);
+//            var temperature = double.Parse(values[3], CultureInfo.InvariantCulture);
+//            var pressure = double.Parse(values[4], CultureInfo.InvariantCulture);
+//            var humidity = GetHumidity(td, temperature);
 
-            const string Sql = 
-@"INSERT INTO ""WeatherEntries"" (""Timestamp"", ""Temperature"", ""Humidity"", ""Pressure"")
-VALUES (@p1, @p2, @p3, @p4)";
+//            const string Sql = 
+//@"INSERT INTO ""WeatherEntries"" (""Timestamp"", ""Temperature"", ""Humidity"", ""Pressure"")
+//VALUES (@p1, @p2, @p3, @p4)";
 
-            using var insertCommand = new NpgsqlCommand(Sql, connection)
-            {
-                Parameters =
-                {
-                    new() { ParameterName = "@p1", Value = timestamp },
-                    new() { ParameterName = "@p2", Value = temperature },
-                    new() { ParameterName = "@p3", Value = humidity },
-                    new() { ParameterName = "@p4", Value = pressure },
-                }
-            };
+//            using var insertCommand = new NpgsqlCommand(Sql, connection)
+//            {
+//                Parameters =
+//                {
+//                    new() { ParameterName = "@p1", Value = timestamp },
+//                    new() { ParameterName = "@p2", Value = temperature },
+//                    new() { ParameterName = "@p3", Value = humidity },
+//                    new() { ParameterName = "@p4", Value = pressure },
+//                }
+//            };
 
-            await insertCommand.ExecuteNonQueryAsync(stoppingToken);
-        }
+//            await insertCommand.ExecuteNonQueryAsync(stoppingToken);
+//        }
     }
 
     private double GetHumidity(double td, double t)
