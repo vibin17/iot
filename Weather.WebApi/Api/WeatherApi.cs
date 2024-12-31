@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 using Weather.WebApi.Api.Models;
 using Weather.WebApi.Data;
@@ -45,11 +45,7 @@ public static class WeatherApi
         var points = await GetHistoryAsyncCore(
             from, 
             to, 
-            e => new DataPointDto 
-            { 
-                Timestamp = e.Timestamp, 
-                Value = e.Temperature 
-            }, 
+            "Temperature", 
             weatherContext, 
             cancellationToken);
 
@@ -65,11 +61,7 @@ public static class WeatherApi
         var points = await GetHistoryAsyncCore(
             from,
             to,
-            e => new DataPointDto
-            {
-                Timestamp = e.Timestamp,
-                Value = e.Humidity
-            },
+            "Humidity",
             weatherContext,
             cancellationToken);
 
@@ -85,11 +77,7 @@ public static class WeatherApi
         var points = await GetHistoryAsyncCore(
             from,
             to,
-            e => new DataPointDto
-            {
-                Timestamp = e.Timestamp,
-                Value = e.Pressure
-            },
+            "Pressure",
             weatherContext,
             cancellationToken);
 
@@ -97,18 +85,24 @@ public static class WeatherApi
     }
 
     private static async Task<IReadOnlyCollection<DataPointDto>> GetHistoryAsyncCore(
-        DateTimeOffset from, 
+        DateTimeOffset from,
         DateTimeOffset to,
-        Expression<Func<WeatherSnapshot, DataPointDto>> selector,
+        string columnName,
         WeatherContext context,
         CancellationToken cancellationToken)
     {
-        return await context.Database.SqlQuery<DataPointDto>($"""
-            SELECT time, value
-            FROM unnest((
-            SELECT lttb(date, reading, 8)
-            FROM metrics))
-            """)
+        var raw = $$"""
+            SELECT time as "Timestamp", value as "Value" FROM unnest(
+                (SELECT asap_smooth("Timestamp", "{{columnName}}", 100)
+                    FROM (
+                        SELECT "Timestamp", "{{columnName}}" FROM "WeatherSnapshots"
+                        WHERE "Timestamp" > {0} and "Timestamp" < {1})))
+        """;
+
+        var sql =  FormattableStringFactory.Create(raw, from, to);
+
+        return await context.Database
+            .SqlQuery<DataPointDto>(sql)
             .ToListAsync(cancellationToken);
     }
 }
