@@ -12,7 +12,7 @@ namespace Weather.WebApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "WeatherEntries",
+                name: "WeatherSnapshots",
                 columns: table => new
                 {
                     Timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -24,16 +24,18 @@ namespace Weather.WebApi.Migrations
                 {
                 });
 
-            migrationBuilder.Sql(@"
-SELECT create_hypertable('""WeatherEntries""', 'Timestamp');
-CREATE INDEX ix_symbol_time ON ""WeatherEntries"" (""Timestamp"" DESC)");
+            migrationBuilder.Sql(
+                $"""
+                    SELECT create_hypertable('"WeatherSnapshots"', 'Timestamp');
+                    CREATE INDEX ix_symbol_time ON "WeatherSnapshots" ("Timestamp" DESC)
+                """);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "WeatherEntries");
+                name: "WeatherSnapshots");
         }
     }
 }

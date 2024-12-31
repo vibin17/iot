@@ -12,7 +12,7 @@ using Weather.WebApi.Data;
 namespace Weather.WebApi.Migrations
 {
     [DbContext(typeof(WeatherContext))]
-    [Migration("20241115175811_Initial")]
+    [Migration("20241230234733_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace Weather.WebApi.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Weather.WebApi.Data.WeatherEntry", b =>
+            modelBuilder.Entity("Weather.WebApi.Data.WeatherSnapshot", b =>
                 {
                     b.Property<double>("Humidity")
                         .HasColumnType("double precision");
@@ -39,7 +39,7 @@ namespace Weather.WebApi.Migrations
                     b.Property<DateTimeOffset>("Timestamp")
                         .HasColumnType("timestamp with time zone");
 
-                    b.ToTable("WeatherEntries");
+                    b.ToTable("WeatherSnapshots");
                 });
 #pragma warning restore 612, 618
         }

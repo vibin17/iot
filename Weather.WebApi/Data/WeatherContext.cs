@@ -4,7 +4,7 @@ namespace Weather.WebApi.Data;
 
 public class WeatherContext : DbContext
 {
-    public required DbSet<WeatherEntry> WeatherEntries { get; init; }
+    public required DbSet<WeatherSnapshot> WeatherSnapshots { get; init; }
 
     public WeatherContext(DbContextOptions<WeatherContext> options) : base(options)
     {
@@ -13,7 +13,7 @@ public class WeatherContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var builder = modelBuilder.Entity<WeatherEntry>();
+        var builder = modelBuilder.Entity<WeatherSnapshot>();
 
         builder.HasNoKey();
         

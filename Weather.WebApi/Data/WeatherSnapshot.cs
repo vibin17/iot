@@ -1,6 +1,7 @@
-﻿namespace Weather.WebApi.Api.Models;
+﻿
+namespace Weather.WebApi.Data;
 
-public class WeatherEntryDto
+public class WeatherSnapshot
 {
     public required DateTimeOffset Timestamp { get; init; }
 

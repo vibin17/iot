@@ -23,9 +23,9 @@ public static class WeatherApi
         return api;
     }
 
-    public static async Task<Ok<WeatherEntryDto>> GetCurrentAsync(CancellationToken cancellationToken)
+    public static async Task<Ok<WeatherSnapshotDto>> GetCurrentAsync(CancellationToken cancellationToken)
     {
-        var current = new WeatherEntryDto
+        var current = new WeatherSnapshotDto
         {
             Timestamp = DateTimeOffset.Now,
             Temperature = -5,
@@ -99,12 +99,16 @@ public static class WeatherApi
     private static async Task<IReadOnlyCollection<DataPointDto>> GetHistoryAsyncCore(
         DateTimeOffset from, 
         DateTimeOffset to,
-        Expression<Func<WeatherEntry, DataPointDto>> selector,
+        Expression<Func<WeatherSnapshot, DataPointDto>> selector,
         WeatherContext context,
         CancellationToken cancellationToken)
     {
-        return null;
-
-        //return await context.WeatherEntries.AsNoTracking().Where(e => e.Timestamp > from && e.Timestamp < to).Select(selector).ToListAsync(cancellationToken);
+        return await context.Database.SqlQuery<DataPointDto>($"""
+            SELECT time, value
+            FROM unnest((
+            SELECT lttb(date, reading, 8)
+            FROM metrics))
+            """)
+            .ToListAsync(cancellationToken);
     }
 }

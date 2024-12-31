@@ -16,7 +16,10 @@ builder.Services.AddDbContext<WeatherContext>(
         "Host=localhost;Port=5432;Database=weather;Password=postgres;Username=postgres", 
         pgsql => pgsql.MigrationsAssembly(typeof(Program).Assembly.FullName)));
 
-builder.Services.AddHostedService<Worker>();
+builder.Services.AddSingleton<ISnapshots, Snapshots>();
+
+builder.Services.AddHostedService<Seeder>();
+builder.Services.AddHostedService<PollingWorker>();
 
 var app = builder.Build();
 
