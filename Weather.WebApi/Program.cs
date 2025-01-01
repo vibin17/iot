@@ -18,8 +18,11 @@ builder.Services.AddDbContext<WeatherContext>(
 
 builder.Services.AddSingleton<ISnapshots, Snapshots>();
 
+builder.Services.AddCors();
+
 builder.Services.AddHostedService<Seeder>();
 builder.Services.AddHostedService<PollingWorker>();
+
 
 var app = builder.Build();
 
@@ -29,6 +32,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(cors => cors.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.UseHttpsRedirection();
 
