@@ -1,0 +1,24 @@
+﻿@page "/"
+
+<PageTitle>Weather</PageTitle>
+
+@if (_current is not null)
+{
+    <MudText Typo="Typo.h4">Weather information:</MudText>
+    <MudText Typo="Typo.h6">Timestamp: @_current.Timestamp</MudText>
+    <MudText Typo="Typo.h6">Temperature: @_current.Temperature</MudText>
+    <MudText Typo="Typo.h6">Humidity: @_current.Humidity</MudText>
+    <MudText Typo="Typo.h6">Pressure: @_current.Pressure</MudText>
+}
+
+@code {
+    [Inject]
+    public required IWeatherApi WeatherApi { get; init; }
+
+    private WeatherSnapshotDto _current = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _current = await WeatherApi.GetCurrentAsync(CancellationToken.None);
+    }
+}

@@ -1,0 +1,27 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="true" />
+<MudDialogProvider FullWidth="true"
+                   MaxWidth="MaxWidth.Medium"
+                   CloseButton="true"
+                   Position="DialogPosition.Center"
+                   CloseOnEscapeKey="true" />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+<MudLayout>
+    <MudAppBar Elevation="0">
+    </MudAppBar>
+    <MudMainContent>
+        <MudContainer Class="px-6 py-4"
+                      Fixed>
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
