@@ -99,7 +99,7 @@ public static class WeatherApi
                         WHERE "Timestamp" > {0} and "Timestamp" < {1})))
         """;
 
-        var sql =  FormattableStringFactory.Create(raw, from, to);
+        var sql =  FormattableStringFactory.Create(raw, from.ToUniversalTime(), to.ToUniversalTime());
 
         return await context.Database
             .SqlQuery<DataPointDto>(sql)
