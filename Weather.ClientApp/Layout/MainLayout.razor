@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider IsDarkMode="true" />
+<MudThemeProvider IsDarkMode="false" />
 <MudDialogProvider FullWidth="true"
                    MaxWidth="MaxWidth.Medium"
                    CloseButton="true"
@@ -17,10 +17,10 @@
 
 <MudLayout>
     <MudAppBar Elevation="0">
+        <MudText Typo="Typo.h4">Weather</MudText>
     </MudAppBar>
     <MudMainContent>
-        <MudContainer Class="px-6 py-4"
-                      Fixed>
+        <MudContainer Class="py-4" MaxWidth="MaxWidth.Medium">
             @Body
         </MudContainer>
     </MudMainContent>

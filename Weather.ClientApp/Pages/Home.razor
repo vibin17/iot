@@ -2,23 +2,146 @@
 
 <PageTitle>Weather</PageTitle>
 
-@if (_current is not null)
-{
-    <MudText Typo="Typo.h4">Weather information:</MudText>
-    <MudText Typo="Typo.h6">Timestamp: @_current.Timestamp</MudText>
-    <MudText Typo="Typo.h6">Temperature: @_current.Temperature</MudText>
-    <MudText Typo="Typo.h6">Humidity: @_current.Humidity</MudText>
-    <MudText Typo="Typo.h6">Pressure: @_current.Pressure</MudText>
-}
+<MudStack>
+    <MudCard Outlined="true" Elevation="3">
+        <MudCardHeader>
+            <MudText Typo="Typo.h5">
+                Current weather
+            </MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudContainer>
+                @if (_current is not null)
+                {
+                    <MudText Typo="Typo.body1">Timestamp: @_current.Timestamp</MudText>
+                    <MudText Typo="Typo.body1">Temperature: @_current.Temperature</MudText>
+                    <MudText Typo="Typo.body1">Humidity: @_current.Humidity</MudText>
+                    <MudText Typo="Typo.body1">Pressure: @_current.Pressure</MudText>
+                }
+            </MudContainer>
+        </MudCardContent>
+    </MudCard>
+
+    <MudCard Outlined="true" Elevation="3">
+        <MudCardHeader>
+            <MudText Typo="Typo.h5">
+                History
+            </MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudContainer>
+                <MudStack>
+                    <MudSelect @bind-Value="_parameter" Label="Select parameter" Placeholder="Parameter">
+                        <MudSelectItem Value="@(Temperature)">@Temperature</MudSelectItem>
+                        <MudSelectItem Value="@(Humidity)">@Humidity</MudSelectItem>
+                        <MudSelectItem Value="@(Pressure)">@Pressure</MudSelectItem>
+                    </MudSelect>
+                    <MudDateRangePicker @bind-DateRange="@_dateRange"
+                    Label="Select period"
+                    Margin="Margin.Dense"
+                    PlaceholderStart="From"
+                    PlaceholderEnd="To" />
+                    <MudButton Variant="Variant.Filled" OnClick="@UpdatePlot" Color="MudBlazor.Color.Primary">Update</MudButton>
+                </MudStack>
+                @if (_points is not null)
+                {
+                    <MudText Typo="Typo.h6">@_parameterLabel</MudText>
+                    <ApexChart @ref="_chart" 
+                    TItem="PlotPoint"
+                    Options="_options"
+                    XAxisType="XAxisType.Datetime">
+                        <ApexPointSeries TItem="PlotPoint"
+                        Items="_points"
+                        SeriesType="SeriesType.Line"
+                        XValue="p => p.Timestamp"
+                        YValue="p => p.Value" />
+                    </ApexChart>
+                }
+            </MudContainer>
+        </MudCardContent>
+    </MudCard>
+</MudStack>
 
 @code {
     [Inject]
     public required IWeatherApi WeatherApi { get; init; }
 
     private WeatherSnapshotDto _current = null!;
+    private ApexChart<PlotPoint> _chart = null!;
+    private IReadOnlyCollection<PlotPoint> _points = null!;
+    private string _parameter = Temperature;
+    private string _parameterLabel = Temperature;
+    private DateRange _dateRange = new(DateTime.Now.AddMonths(-3), DateTime.Now.AddMonths(-1));
+    private ApexChartOptions<PlotPoint> _options = new()
+    {
+        Chart = new()
+        {
+            Toolbar = new()
+            {
+                Tools = new()
+                {
+                    Download = false,
+                    Pan = false,
+                    Reset = false,
+                    Selection = false,
+                    Zoom = false,
+                    Zoomin = false,
+                    Zoomout = false,
+                }
+            }
+        }
+    };
+
+    private const string Temperature = "Temperature";
+    private const string Humidity = "Humidity";
+    private const string Pressure = "Pressure";
 
     protected override async Task OnInitializedAsync()
     {
         _current = await WeatherApi.GetCurrentAsync(CancellationToken.None);
+
+        var points = await WeatherApi.GetTemperatureHistoryAsync(_dateRange.Start!.Value, _dateRange.End!.Value, CancellationToken.None);
+
+        _points = points.Select(p => new PlotPoint(p.Timestamp, (decimal)p.Value)).ToArray();
     }
+
+    private async Task UpdatePlot()
+    {
+        IReadOnlyCollection<DataPointDto> points = null!;
+
+        if (_parameter is Temperature)
+        {
+            points = await WeatherApi.GetTemperatureHistoryAsync(_dateRange.Start!.Value, _dateRange.End!.Value, CancellationToken.None);
+        }
+
+        if (_parameter is Humidity)
+        {
+            points = await WeatherApi.GetHumidityHistoryAsync(_dateRange.Start!.Value, _dateRange.End!.Value, CancellationToken.None);
+        }
+
+        if (_parameter is Pressure)
+        {
+            points = await WeatherApi.GetPressureHistoryAsync(_dateRange.Start!.Value, _dateRange.End!.Value, CancellationToken.None);
+        }
+
+        _points = points.Select(p => new PlotPoint(p.Timestamp, (decimal)p.Value)).ToArray();
+        _parameterLabel = _parameter;
+
+        StateHasChanged();
+
+        await _chart.UpdateSeriesAsync(true);
+    }
+
+    private static string GetUnits(string parameter)
+    {
+        return parameter switch
+        {
+            Temperature => "°C",
+            Humidity => "%",
+            Pressure => "hPa",
+            _ => throw new InvalidOperationException()
+        };
+    }
+
+    private record PlotPoint(DateTimeOffset Timestamp, decimal Value);
 }

@@ -10,11 +10,11 @@ public interface IWeatherApi
     Task<WeatherSnapshotDto> GetCurrentAsync(CancellationToken cancellationToken);
 
     [Get("/history/temperature")]
-    Task<DataPointDto> GetTemperatureHistoryAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<DataPointDto>> GetTemperatureHistoryAsync([Query] DateTimeOffset from, [Query] DateTimeOffset to, CancellationToken cancellationToken);
 
     [Get("/history/humidity")]
-    Task<DataPointDto> GetHumidityHistoryAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<DataPointDto>> GetHumidityHistoryAsync([Query] DateTimeOffset from, [Query] DateTimeOffset to, CancellationToken cancellationToken);
 
     [Get("/history/pressure")]
-    Task<DataPointDto> GetPressureHistoryAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<DataPointDto>> GetPressureHistoryAsync([Query] DateTimeOffset from, [Query] DateTimeOffset to, CancellationToken cancellationToken);
 }
