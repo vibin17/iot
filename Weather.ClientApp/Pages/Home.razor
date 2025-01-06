@@ -13,10 +13,18 @@
             <MudContainer>
                 @if (_current is not null)
                 {
-                    <MudText Typo="Typo.body1">Timestamp: @_current.Timestamp</MudText>
-                    <MudText Typo="Typo.body1">Temperature: @_current.Temperature</MudText>
-                    <MudText Typo="Typo.body1">Humidity: @_current.Humidity</MudText>
-                    <MudText Typo="Typo.body1">Pressure: @_current.Pressure</MudText>
+                    <MudText Typo="Typo.body1">
+                        <b>Time:</b> @_current.Timestamp.ToString("HH:mm:ss dd.MM.yyyy")
+                    </MudText>
+                    <MudText Typo="Typo.body1">
+                        <b>Temperature:</b> @_current.Temperature °C
+                    </MudText>
+                    <MudText Typo="Typo.body1">
+                        <b>Humidity:</b> @_current.Humidity %
+                    </MudText>
+                    <MudText Typo="Typo.body1">
+                        <b>Pressure: </b>@_current.Pressure.ToString("F2", System.Globalization.CultureInfo.GetCultureInfo("en-US")) hPa
+                    </MudText>
                 }
             </MudContainer>
         </MudCardContent>
@@ -37,35 +45,32 @@
                         <MudSelectItem Value="@(Pressure)">@Pressure</MudSelectItem>
                     </MudSelect>
                     <MudDateRangePicker @bind-DateRange="@_dateRange"
-                    Label="Select period"
-                    Margin="Margin.Dense"
-                    PlaceholderStart="From"
-                    PlaceholderEnd="To" />
+                                        Label="Select period"
+                                        Margin="Margin.Dense"
+                                        PlaceholderStart="From"
+                                        PlaceholderEnd="To" />
                     <MudButton Variant="Variant.Filled" OnClick="@UpdatePlot" Color="MudBlazor.Color.Primary">Update</MudButton>
+                    @if (_points is not null)
+                    {
+                        <MudText Typo="Typo.h6">@($"{_parameterLabel}, {GetUnits(_parameterLabel)}")</MudText>
+                        <ApexChart @ref="_chart"
+                                   TItem="PlotPoint"
+                                   Options="_options"
+                                   XAxisType="XAxisType.Datetime">
+                            <ApexPointSeries TItem="PlotPoint"
+                                             Items="_points"
+                                             SeriesType="SeriesType.Line"
+                                             XValue="p => p.Timestamp"
+                                             YValue="p => p.Value" />
+                        </ApexChart>
+                    }
                 </MudStack>
-                @if (_points is not null)
-                {
-                    <MudText Typo="Typo.h6">@_parameterLabel</MudText>
-                    <ApexChart @ref="_chart" 
-                    TItem="PlotPoint"
-                    Options="_options"
-                    XAxisType="XAxisType.Datetime">
-                        <ApexPointSeries TItem="PlotPoint"
-                        Items="_points"
-                        SeriesType="SeriesType.Line"
-                        XValue="p => p.Timestamp"
-                        YValue="p => p.Value" />
-                    </ApexChart>
-                }
             </MudContainer>
         </MudCardContent>
     </MudCard>
 </MudStack>
 
 @code {
-    [Inject]
-    public required IWeatherApi WeatherApi { get; init; }
-
     private WeatherSnapshotDto _current = null!;
     private ApexChart<PlotPoint> _chart = null!;
     private IReadOnlyCollection<PlotPoint> _points = null!;
@@ -73,28 +78,35 @@
     private string _parameterLabel = Temperature;
     private DateRange _dateRange = new(DateTime.Now.AddMonths(-3), DateTime.Now.AddMonths(-1));
     private ApexChartOptions<PlotPoint> _options = new()
-    {
-        Chart = new()
         {
-            Toolbar = new()
+            Chart = new()
             {
-                Tools = new()
+                Toolbar = new()
                 {
-                    Download = false,
-                    Pan = false,
-                    Reset = false,
-                    Selection = false,
-                    Zoom = false,
-                    Zoomin = false,
-                    Zoomout = false,
+                    Tools = new()
+                    {
+                        Download = false,
+                        Pan = false,
+                        Reset = false,
+                        Selection = false,
+                        Zoom = false,
+                        Zoomin = false,
+                        Zoomout = false,
+                    }
                 }
-            }
-        }
-    };
+            },
+            Yaxis = [new YAxis()
+            {
+                DecimalsInFloat = 0
+            }]
+        };
 
     private const string Temperature = "Temperature";
     private const string Humidity = "Humidity";
     private const string Pressure = "Pressure";
+
+    [Inject]
+    public required IWeatherApi WeatherApi { get; init; }
 
     protected override async Task OnInitializedAsync()
     {
