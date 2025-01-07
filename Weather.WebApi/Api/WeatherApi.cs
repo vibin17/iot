@@ -13,12 +13,12 @@ public static class WeatherApi
 {
     public static RouteGroupBuilder MapWeatherApi(this IEndpointRouteBuilder app)
     {
-        var api = app.MapGroup("api/weather");
+        var api = app.MapGroup("api/weather").WithOpenApi();
 
-        api.MapGet("/current", GetCurrentAsync);
-        api.MapGet("/history/temperature", GetTemperatureHistoryAsync);
-        api.MapGet("/history/humidity", GetHumidityHistoryAsync);
-        api.MapGet("/history/pressure", GetPressureHistoryAsync);
+        api.MapGet("/current", GetCurrentAsync).WithSummary("Получить текущие значения погодных показателей").WithOpenApi();
+        api.MapGet("/history/temperature", GetTemperatureHistoryAsync).WithSummary("Получить историю изменения температуры").WithOpenApi();
+        api.MapGet("/history/humidity", GetHumidityHistoryAsync).WithSummary("Получить историю изменения влажности").WithOpenApi();
+        api.MapGet("/history/pressure", GetPressureHistoryAsync).WithSummary("Получить историю изменения давления").WithOpenApi();
 
         return api;
     }
